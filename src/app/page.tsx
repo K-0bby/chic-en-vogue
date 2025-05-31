@@ -1,103 +1,252 @@
+"use client";
+
+// Import necessary modules from React and Next.js
+import Brands from "@/components/brands";
+import Hero from "@/components/hero";
 import Image from "next/image";
+import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { ArrowRight, Filter } from "lucide-react";
+import { useState } from "react";
+import { products } from "@/lib/data";
+import { cn } from "@/lib/utils";
+
+
+type Item = {
+  title: string;
+  price: number;
+};
+
+type SortOption = "default" | "A-Z" | "Z-A" | "low-to-high" | "high-to-low";
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const [selectedCategory, setSelectedCategory] =
+    useState<string>("All Products");
+  const [sortOption, setSortOption] = useState<SortOption>("default");
+  const [filteredItems, setFilteredItems] = useState<Item[]>([]);
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  const categories = [
+    "All Products",
+    "Hoodies & Joggers",
+    "T-shirts",
+    "Caps & Hats",
+  ];
+
+  // Initialize filteredItems with all products
+  const filteredProducts =
+    selectedCategory === "All Products"
+      ? products
+      : products.filter((product) => product.category === selectedCategory);
+
+  const handleSortChange = (option: SortOption): void => {
+    setSortOption(option);
+
+    // logic for sorting
+    const sortedItems: Item[] = [...filteredItems];
+
+    switch (option) {
+      case "A-Z":
+        sortedItems.sort((a, b) => a.title.localeCompare(b.title));
+        break;
+      case "Z-A":
+        sortedItems.sort((a, b) => b.title.localeCompare(a.title));
+        break;
+      case "low-to-high":
+        sortedItems.sort((a, b) => a.price - b.price);
+        break;
+      case "high-to-low":
+        sortedItems.sort((a, b) => b.price - a.price);
+        break;
+      default:
+        break;
+    }
+
+    setFilteredItems(sortedItems);
+  };
+
+  return (
+    <div className="relative min-h-screen w-full mt-28 px-2 xl:px-24">
+      {/* Hero */}
+      <Hero />
+
+      {/* Brands */}
+      <div className="h-full px-4 xl:px-24 overflow-hidden py-12">
+        <Brands />
+      </div>
+
+      {/* Explore New & Popular Styles */}
+      <div className="h-full mx-auto lg:mt-20 px-7">
+        <div className="mt-8 flex flex-col lg:flex-row items-center gap-6 ">
+          <div className="lg:w-auto flex flex-col items-center lg:items-start">
+            <h5 className="text-black text-center lg:text-left text-lg lg:-rotate-90 lg:p-4 font-bold py-3 inline-flex italic tracking-wide">
+              Explore New & Popular Styles
+            </h5>
+            <div className="bg-gradient-to-r from-[#ff7f50] to-[#ff6b35] w-32 h-1 lg:hidden rounded-full" />
+          </div>
+
+          <div className="flex-1 grid grid-cols-3 lg:grid-cols-6 gap-3 h-[600px] lg:h-[700px] w-full">
+            {/* Large featured item - spans 2x3 */}
+            <div className="col-span-4 row-span-2 group relative overflow-hidden rounded-2xl shadow-lg">
+              <Image
+                src="/images/hoodie.jpeg"
+                alt="featured hoodie"
+                width={400}
+                height={400}
+                className="w-full h-full object-cover group-hover:scale-110 transition-all duration-500"
+              />
+              <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-all duration-300" />
+              <div className="absolute bottom-4 left-4 text-white">
+                <p className="text-xs font-medium">New Collection</p>
+                <h3 className="text-xs font-bold">Premium Hoodies</h3>
+              </div>
+            </div>
+
+            {/* Top right - cap */}
+            <div className="col-span-2 row-span-2 group relative overflow-hidden rounded-xl">
+              <Image
+                src="/images/cap.jpeg"
+                alt="cap"
+                width={400}
+                height={400}
+                className="w-full h-full object-cover group-hover:scale-105 transition-all duration-300"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              <div className="absolute bottom-4 left-4 text-white">
+                <p className="text-xs font-medium">New Collection</p>
+                <h3 className="text-xs font-bold">Premium Cap</h3>
+              </div>
+            </div>
+
+            {/* Middle right - shirt */}
+            <div className="col-span-2 row-span-2 group relative overflow-hidden rounded-xl">
+              <Image
+                src="/images/image5.png"
+                alt="black sweater"
+                width={400}
+                height={400}
+                className="w-full h-full object-cover group-hover:scale-105 transition-all duration-300"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              <div className="absolute bottom-4 left-4 text-white">
+                <p className="text-xs font-medium">New Collection</p>
+                <h3 className="text-xs font-bold">Black Striped sweater</h3>
+              </div>
+            </div>
+
+            {/* Bottom left under main image */}
+            <div className="col-span-4 row-span-4 xl:row-span-2 group relative overflow-hidden rounded-xl">
+              <Image
+                src="/images/1.jpg"
+                alt="men's summer shirt"
+                width={100}
+                height={100}
+                className="w-full h-full object-cover group-hover:scale-105 transition-all duration-300"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              <div className="absolute bottom-4 left-4 text-white">
+                <p className="text-xs font-medium">New Collection</p>
+                <h3 className="text-xs font-bold">Summer shirt</h3>
+              </div>
+            </div>
+          </div>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
+      </div>
+
+      {/* Parallax */}
+      <div className="px-4 ">
+        <div
+          className="relative h-[480px] bg-cover xl:px-28 px-4 bg-fixed bg-center bg-no-repeat my-24 bg-black object-cover rounded-4xl"
+          style={{ backgroundImage: 'url("/parallax/parallax.jpg")' }}
         >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+          <div className="absolute inset-0 bg-black/50 rounded-4xl" />
+          <div className="relative z-10 w-full flex flex-col md:flex-row items-center justify-between object-cover">
+            <div className="md:w-1/2 my-10">
+              <h4 className="text-gray-400 uppercase font-bold mt-20 text-sm ">
+                Mid season sale
+              </h4>
+              <h2 className="text-white text-4xl font-bold mt-2 capitalize mb-6 italic">
+                Summer Collection Up To 20% Discount
+              </h2>
+              <Button
+                size="lg"
+                className="rounded-full relative cursor-pointer mt-6"
+              >
+                <span className="pr-8">View Collection</span>
+
+                <span className="absolute right-1 border border-white rounded-full p-1 bg-white text-black">
+                  <ArrowRight className="w-6 h-6 " />
+                </span>
+              </Button>
+            </div>
+            <div className="md:w-1/2"></div>
+          </div>
+        </div>
+      </div>
+
+      {/* New Arrivals */}
+      <div className="h-screen container px-4 py-5 xl:px-24">
+        <h2 className="text-lg">Popular Products</h2>
+        <div className="bg-gradient-to-r from-[#ff7f50] to-[#ff6b35] w-24 h-1 rounded-full mx-5 my-2" />
+
+        <div className="flex flex-col lg:flex-row lg:justify-between mt-5">
+          {/* Category Filter */}
+          <div
+            role="toolbar"
+            aria-label="Category Filter"
+            className="flex flex-wrap gap-4 mb-8 lg:mb-0 py-4"
+          >
+            {categories.map((category) => (
+              <button
+                key={category}
+                onClick={() => setSelectedCategory(category)}
+                className={cn(
+                  "px-3 sm:px-4 md:px-6 py-2 transition-all rounded-full",
+                  selectedCategory === category
+                    ? "bg-[#ff7f50] text-white"
+                    : "bg-muted hover:bg-[#ff7f50]/10"
+                )}
+                aria-pressed={selectedCategory === category}
+              >
+                {category.charAt(0).toUpperCase() + category.slice(1)}
+              </button>
+            ))}
+          </div>
+
+          {/* Filter Options */}
+          <div className="justify-end items-center hidden lg:flex">
+            {/* Filter Button */}
+            <Button
+              variant="outline"
+              className="bg-black text-white p-2 rounded-sm"
+            >
+              <Filter className="w-4 h-4" />
+            </Button>
+
+            {/* Select Dropdown */}
+            <Select onValueChange={handleSortChange} defaultValue={sortOption}>
+              <SelectTrigger className="bg-black text-white py-1 rounded-sm outline-none">
+                <SelectValue placeholder="Sort" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="default">Default</SelectItem>
+                <SelectItem value="A-Z">A-Z</SelectItem>
+                <SelectItem value="Z-A">Z-A</SelectItem>
+                <SelectItem value="low-to-high">Low to High</SelectItem>
+                <SelectItem value="high-to-low">High to Low</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+      </div>
+
+
+      {/* Testimonials */}
     </div>
   );
 }
