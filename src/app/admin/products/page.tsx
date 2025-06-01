@@ -1,7 +1,9 @@
-export default function Products() {
+import ProductsPage from "@/components/admin-dashboard/dashboard-products/products";
+
+export default function AdminProducts() {
     return (
-        <div className="flex justify-center items-center-safe h-full">
-            <h1 className="text-2xl font-bold">Products Page</h1>
+        <div>
+            <ProductsPage />
         </div>
     );
 }
