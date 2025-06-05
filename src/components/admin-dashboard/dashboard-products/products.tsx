@@ -9,12 +9,20 @@ import {
 } from "@/components/ui/table";
 
 import { NewProduct } from "./new";
+import { EditPage } from "./edit";
 import prisma from "@/lib/prisma";
-import { CheckCircle2, Edit, Trash2, XCircle } from "lucide-react";
+import { CheckCircle2, MoreVertical, XCircle } from "lucide-react";
 import { formatCurrency } from "@/components/formatters";
-import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+// import Link from "next/link";
+import { ActiveToggle, DeleteItem } from "./product-action";
 
-export default function ProductsPage() {
+export default async function ProductsPage() {
   return (
     <>
       <div className="flex justify-between items-center gap-4">
@@ -27,13 +35,19 @@ export default function ProductsPage() {
 }
 
 async function ProductList() {
+  // const product = await prisma.product.findUnique({ where: { id } });
   const products = await prisma.product.findMany({
     select: {
       id: true,
       name: true,
+      description: true,
       price: true,
-      stock: true,
+      imageUrl: true,
+      categoryId: true,
       isAvailable: true,
+      stock: true,
+      createdAt: true,
+      updatedAt: true,
       category: {
         select: {
           name: true, // Fetch category name
@@ -66,11 +80,13 @@ async function ProductList() {
             <TableCell>
               {product.isAvailable ? (
                 <>
-                  <CheckCircle2 /> <span className="sr-only">Available</span>
+                  <CheckCircle2 className="stroke-green-500" />{" "}
+                  <span className="sr-only">Available</span>
                 </>
               ) : (
                 <>
-                  <XCircle /> <span className="sr-only">Not Available</span>
+                  <XCircle className="stroke-destructive" />{" "}
+                  <span className="sr-only">Not Available</span>
                 </>
               )}
             </TableCell>
@@ -78,15 +94,25 @@ async function ProductList() {
             <TableCell>{product.category.name}</TableCell>
             <TableCell>{formatCurrency(product.price)}</TableCell>
             <TableCell>{product.stock}</TableCell>
-            <TableCell className="text-right">
-              <div className="flex gap-2">
-                <Button variant="outline" size="sm">
-                  <Edit className="h-4 w-4 text-green-500" />
-                </Button>
-                <Button variant="outline" size="sm">
-                  <Trash2 className="h-4 w-4 text-red-500" />
-                </Button>
-              </div>
+            <TableCell>
+              <DropdownMenu>
+                <DropdownMenuTrigger>
+                  <MoreVertical />
+                  <span className="sr-only">Actions</span>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="mr-3">
+                    <DropdownMenuItem asChild>
+                    <EditPage product={{ ...product, categoryId: product.category.name }} />
+                    </DropdownMenuItem>
+                  {/* To toggle the isAvailable action on products*/}
+                  <ActiveToggle
+                    id={product.id}
+                    isAvailable={product.isAvailable}
+                  />
+                  {/* To delete products */}
+                  <DeleteItem id={product.id} disabled={product.stock <= 0} />
+                </DropdownMenuContent>
+              </DropdownMenu>
             </TableCell>
           </TableRow>
         ))}

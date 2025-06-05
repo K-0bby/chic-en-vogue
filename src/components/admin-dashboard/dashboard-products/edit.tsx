@@ -11,28 +11,33 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Plus, Upload } from "lucide-react";
-import { addProducts } from "@/app/admin/_actions/product";
+import { Upload } from "lucide-react";
+import { addProducts, editProducts } from "@/app/admin/_actions/product";
 import { useFormStatus } from "react-dom";
+import { Product } from "@/generated/prisma";
+import Image from "next/image";
 
-// This component displays a dialog form to add products
-export function NewProduct() {
+// This component displays a dialog form to add or edit a product
+export function EditPage({ product }: { product?: Product | null }) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [price, setPrice] = useState<number>(0);
+  const [price, setPrice] = useState<number | undefined>(product?.price || 0); // Manages price input
 
-  // Handles form submission using add function
-  const [error, action] = useActionState(addProducts, {});
+// Handles form submission using either add or edit function
+  const [error, action] = useActionState(
+    product == null ? addProducts : editProducts.bind(null, product.id),
+    {}
+  );
   return (
     <>
       <div>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
             <Button
+              variant="ghost"
               onClick={() => setIsDialogOpen(true)}
-              className="bg-[#ff7f50] text-white hover:bg-[#ff7f50]/80 rounded-full"
+              className="w-full justify-start p-2 font-normal"
             >
-              <Plus className="h-4 w-4" />
-              Add Products
+              Edit
             </Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-[600px]">
@@ -41,7 +46,6 @@ export function NewProduct() {
             </DialogHeader>
             <form action={action} className="space-y-4">
               {/* Product Name & Price */}
-              <div></div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="name">Product Name</Label>
@@ -50,6 +54,7 @@ export function NewProduct() {
                     name="name"
                     className="rounded-full"
                     required
+                    defaultValue={product?.name || ""}
                   />
                   {error.name && (
                     <div className="text-destructive">{error.name}</div>
@@ -70,9 +75,6 @@ export function NewProduct() {
                   {error.price && (
                     <div className="text-destructive">{error.price}</div>
                   )}
-                  {/* <div className="text-muted-foreground">
-                    {formatCurrency(price)}
-                  </div> */}
                 </div>
               </div>
 
@@ -83,6 +85,7 @@ export function NewProduct() {
                   <Input
                     id="category"
                     name="category"
+                    defaultValue={product?.categoryId}
                     className="rounded-full"
                     required
                   />
@@ -96,6 +99,7 @@ export function NewProduct() {
                     id="stock"
                     type="number"
                     name="stock"
+                    defaultValue={product?.stock}
                     className="rounded-full"
                     required
                   />
@@ -112,6 +116,7 @@ export function NewProduct() {
                   id="description"
                   name="description"
                   rows={5}
+                  defaultValue={product?.description}
                   required
                 />
                 {error.description && (
@@ -128,6 +133,7 @@ export function NewProduct() {
                     type="file"
                     name="image"
                     className="rounded-full"
+                    required={product == null} // Only required when adding a new product
                   />
                   <Button
                     type="button"
@@ -141,9 +147,17 @@ export function NewProduct() {
                     <div className="text-destructive">{error.image}</div>
                   )}
                 </div>
+                {product != null && (
+                  <Image
+                    src={`/${product.imageUrl}`}
+                    height={100}
+                    width={100}
+                    alt="Product Image"
+                  />
+                )}
               </div>
 
-              {/* Product Button */}
+              {/* Action Buttons */}
               <div className="flex justify-end gap-2">
                 <Button
                   type="button"
@@ -162,6 +176,7 @@ export function NewProduct() {
     </>
   );
 }
+
 
 // Submit button with loading state handling
 function SubmitButton() {
