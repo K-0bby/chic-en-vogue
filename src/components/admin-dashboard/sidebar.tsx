@@ -39,7 +39,7 @@ export function AdminSidebar() {
   const pathname = usePathname();
   const router = useRouter();
   return (
-    <Sidebar className="w-64 h-full fixed top-21 left-0">
+    <Sidebar className="w-64 h-full fixed top-0 left-0">
       <SidebarHeader className="border-b p-4 my-1">
         <h2 className="text-2xl font-bold">Admin Panel</h2>
       </SidebarHeader>

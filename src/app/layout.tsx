@@ -1,13 +1,13 @@
 import type { Metadata } from "next";
-import { Inter, Cormorant_Garamond } from "next/font/google";
+import { Inter, Luckiest_Guy } from "next/font/google";
 import "./globals.css";
-import Navbar from "@/components/ui/navbar";
+// import Navbar from "@/components/ui/navbar";
 // import Footer from "@/components/ui/footer";
 import ClientWrapper from "./client-wrapper";
 
-const cormorantSans = Cormorant_Garamond({
+const luckiestGuy = Luckiest_Guy({
   variable: "--font-cormorant-sans",
-  weight: ["400", "500", "600", "700"],
+  weight: ["400"],
   subsets: ["latin"],
 });
 const inter = Inter({
@@ -32,10 +32,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${cormorantSans.variable} ${inter.variable} antialiased`}
+        className={`${luckiestGuy.variable} ${inter.variable} antialiased`}
         suppressHydrationWarning
       >
-        <Navbar />
+        {/* <Navbar /> */}
         <ClientWrapper>{children}</ClientWrapper>
       </body>
     </html>

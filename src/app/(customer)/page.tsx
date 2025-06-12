@@ -1,74 +1,28 @@
-"use client";
-
 // Import necessary modules from React and Next.js
 import Brands from "@/components/brands";
 import Hero from "@/components/hero";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { ArrowRight, Filter } from "lucide-react";
-import { useState } from "react";
-import { products } from "@/lib/data";
-import { cn } from "@/lib/utils";
+import { ArrowRight } from "lucide-react";
+import prisma from "@/lib/prisma";
+import { FeaturedProducts } from "@/components/featured-products";
 
 
-type Item = {
-  title: string;
-  price: number;
-};
 
-type SortOption = "default" | "A-Z" | "Z-A" | "low-to-high" | "high-to-low";
+async function getNewestProducts() {
+  const dbProducts = await prisma.product.findMany();
+  return dbProducts.map((product) => ({
+    id: product.id,
+    name: product.name, // Map `name` to `title`
+    price: product.price,
+    category: product.categoryId, // Map `categoryId` to `category`
+    image: product.imageUrl, // Map `imageUrl` to `image`
+  }));
+}
 
-export default function Home() {
-  const [selectedCategory, setSelectedCategory] =
-    useState<string>("All Products");
-  const [sortOption, setSortOption] = useState<SortOption>("default");
-  const [filteredItems, setFilteredItems] = useState<Item[]>([]);
+export default async function Home() {
 
-  const categories = [
-    "All Products",
-    "Hoodies & Joggers",
-    "T-shirts",
-    "Caps & Hats",
-  ];
-
-  // Initialize filteredItems with all products
-  const filteredProducts =
-    selectedCategory === "All Products"
-      ? products
-      : products.filter((product) => product.category === selectedCategory);
-
-  const handleSortChange = (option: SortOption): void => {
-    setSortOption(option);
-
-    // logic for sorting
-    const sortedItems: Item[] = [...filteredItems];
-
-    switch (option) {
-      case "A-Z":
-        sortedItems.sort((a, b) => a.title.localeCompare(b.title));
-        break;
-      case "Z-A":
-        sortedItems.sort((a, b) => b.title.localeCompare(a.title));
-        break;
-      case "low-to-high":
-        sortedItems.sort((a, b) => a.price - b.price);
-        break;
-      case "high-to-low":
-        sortedItems.sort((a, b) => b.price - a.price);
-        break;
-      default:
-        break;
-    }
-
-    setFilteredItems(sortedItems);
-  };
+  const products = await getNewestProducts()
 
   return (
     <div className="relative min-h-screen w-full mt-28 px-2 xl:px-24">
@@ -179,7 +133,7 @@ export default function Home() {
               >
                 <span className="pr-8">View Collection</span>
 
-                <span className="absolute right-1 border border-white rounded-full p-1 bg-white text-black">
+                <span className="absolute right-1.5 border border-white rounded-full p-1 bg-white text-black">
                   <ArrowRight className="w-6 h-6 " />
                 </span>
               </Button>
@@ -194,59 +148,13 @@ export default function Home() {
         <h2 className="text-lg">Popular Products</h2>
         <div className="bg-gradient-to-r from-[#ff7f50] to-[#ff6b35] w-24 h-1 rounded-full mx-5 my-2" />
 
-        <div className="flex flex-col lg:flex-row lg:justify-between mt-5">
+       
           {/* Category Filter */}
-          <div
-            role="toolbar"
-            aria-label="Category Filter"
-            className="flex flex-wrap gap-4 mb-8 lg:mb-0 py-4"
-          >
-            {categories.map((category) => (
-              <button
-                key={category}
-                onClick={() => setSelectedCategory(category)}
-                className={cn(
-                  "px-3 sm:px-4 md:px-6 py-2 transition-all rounded-full",
-                  selectedCategory === category
-                    ? "bg-[#ff7f50] text-white"
-                    : "bg-muted hover:bg-[#ff7f50]/10"
-                )}
-                aria-pressed={selectedCategory === category}
-              >
-                {category.charAt(0).toUpperCase() + category.slice(1)}
-              </button>
-            ))}
-          </div>
+          <FeaturedProducts products={products} />
+        
 
-          {/* Filter Options */}
-          <div className="justify-end items-center hidden lg:flex">
-            {/* Filter Button */}
-            <Button
-              variant="outline"
-              className="bg-black text-white p-2 rounded-sm"
-            >
-              <Filter className="w-4 h-4" />
-            </Button>
-
-            {/* Select Dropdown */}
-            <Select onValueChange={handleSortChange} defaultValue={sortOption}>
-              <SelectTrigger className="bg-black text-white py-1 rounded-sm outline-none">
-                <SelectValue placeholder="Sort" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="default">Default</SelectItem>
-                <SelectItem value="A-Z">A-Z</SelectItem>
-                <SelectItem value="Z-A">Z-A</SelectItem>
-                <SelectItem value="low-to-high">Low to High</SelectItem>
-                <SelectItem value="high-to-low">High to Low</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
+        {/* Testimonials */}
       </div>
-
-
-      {/* Testimonials */}
     </div>
   );
 }
